@@ -52,7 +52,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 
-#define LSOCKET_VERSION "1.3"
+#define LSOCKET_VERSION "1.4"
 
 #define LSOCKET "socket"
 #define TOSTRING_BUFSIZ 64
@@ -141,6 +141,7 @@ static int lsocket_islSocket(lua_State *L, int index)
 static lSocket* lsocket_pushlSocket(lua_State *L)
 {
 	lSocket *sock = (lSocket*) lua_newuserdata(L, sizeof(lSocket));
+	sock->sockfd = -1;
 	luaL_getmetatable(L, LSOCKET);
 	lua_setmetatable(L, -2);
 	return sock;
@@ -880,7 +881,7 @@ static int lsocket_sock_recv(lua_State *L)
 	lSocket *sock = lsocket_checklSocket(L, 1);
 
 	uint32_t howmuch = luaL_optnumber(L, 2, READER_BUFSIZ);
-	if (lua_tonumber(L, 2) > UINT_MAX)
+	if (lua_tointeger(L, 2) > UINT_MAX)
 		return luaL_error(L, "bad argument #1 to 'recv' (invalid number)");
 	
 	char *buf = malloc(howmuch);
@@ -891,9 +892,9 @@ static int lsocket_sock_recv(lua_State *L)
 			lua_pushboolean(L, 0);
 		else
 			return lsocket_error(L, strerror(errno));
-	} else if (nrd == 0)
+	} else if (nrd == 0) {
 		lua_pushnil(L);
-	else {
+	} else {
 		lua_pushlstring(L, buf, nrd);
 		free(buf);
 	}
@@ -924,7 +925,7 @@ static int lsocket_sock_recvfrom(lua_State *L)
 {
 	lSocket *sock = lsocket_checklSocket(L, 1);
 	uint32_t howmuch = luaL_optnumber(L, 2, READER_BUFSIZ);
-	if (lua_tonumber(L, 2) > UINT_MAX)
+	if (lua_tointeger(L, 2) > UINT_MAX)
 		return luaL_error(L, "bad argument #1 to 'recvfrom' (invalid number)");
 	
 	char sabuf[SOCKADDR_BUFSIZ];
@@ -938,9 +939,9 @@ static int lsocket_sock_recvfrom(lua_State *L)
 			lua_pushboolean(L, 0);
 		else
 			return lsocket_error(L, strerror(errno));
-	} else if (nrd == 0)
+	} else if (nrd == 0) {
 		lua_pushnil(L); /* not possible for udp, so should not get here */
-	else {
+	} else {
 		lua_pushlstring(L, buf, nrd);
 		free(buf);
 		char ipbuf[SOCKADDR_BUFSIZ];
@@ -1136,8 +1137,11 @@ static int _table2fd_set(lua_State *L, int idx, fd_set *s)
 	lua_rawgeti(L, idx, i++);
 	while (lsocket_islSocket(L, -1)) {
 		lSocket *sock = lsocket_checklSocket(L, -1);
+		if (sock->sockfd > FD_SETSIZE) {
+			lua_pop(L, 1);
+			return luaL_error(L, "bad argument to 'select' (socket file descriptor too big)");
+		}
 		if (sock->sockfd >= 0) {
-			// todo: check FD_SETSIZE
 			FD_SET(sock->sockfd, s);
 			if (sock->sockfd > maxfd) maxfd = sock->sockfd;
 		}
