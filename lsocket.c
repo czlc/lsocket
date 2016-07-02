@@ -7,7 +7,6 @@
  */
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -16,7 +15,7 @@
 #include "win_compat.h"
 
 #else
-
+#include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -49,9 +48,10 @@
 	#define HAVE_ABSTRACT_UDSOCKETS
 #endif
 
+extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
-
+};
 #define LSOCKET_VERSION "1.4"
 
 #define LSOCKET "socket"
@@ -884,7 +884,7 @@ static int lsocket_sock_recv(lua_State *L)
 	if (lua_tointeger(L, 2) > UINT_MAX)
 		return luaL_error(L, "bad argument #1 to 'recv' (invalid number)");
 	
-	char *buf = malloc(howmuch);
+	char *buf = (char *)malloc(howmuch);
 	int nrd = recv(sock->sockfd, buf, howmuch, 0);
 	if (nrd < 0) {
 		free(buf);
@@ -931,7 +931,7 @@ static int lsocket_sock_recvfrom(lua_State *L)
 	char sabuf[SOCKADDR_BUFSIZ];
 	struct sockaddr *sa = (struct sockaddr*) sabuf;
 	socklen_t slen = sizeof(sabuf);
-	char *buf = malloc(howmuch);
+	char *buf = (char *)malloc(howmuch);
 	int nrd = recvfrom(sock->sockfd, buf, howmuch, 0, sa, &slen);
 	if (nrd < 0) {
 		free(buf);
@@ -1446,6 +1446,12 @@ static int lsocket_ignore(lua_State *L)
  * 
  * open and initialize this library
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+__declspec(dllexport)
 int luaopen_lsocket(lua_State *L)
 {
 	init_socketlib(L);
@@ -1497,3 +1503,7 @@ int luaopen_lsocket(lua_State *L)
 
 	return 1;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -4,9 +4,10 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdint.h>
+extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
-
+};
 #define SO_NOSIGPIPE 0		// ignore it, don't support
 
 #ifndef WIN_COMPAT_IMPL
@@ -26,7 +27,41 @@
 
 #endif
 
-int win_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
+#if defined(_MSC_VER) && _MSC_VER < 1900
+
+#define snprintf c99_snprintf
+#define vsnprintf c99_vsnprintf
+#define strcasecmp _stricmp
+
+inline int c99_vsnprintf(char *outBuf, size_t size, const char *format, va_list ap)
+{
+	int count = -1;
+
+	if (size != 0)
+		count = _vsnprintf_s(outBuf, size, _TRUNCATE, format, ap);
+	if (count == -1)
+		count = _vscprintf(format, ap);
+
+	return count;
+}
+
+inline int c99_snprintf(char *outBuf, size_t size, const char *format, ...)
+{
+	int count;
+	va_list ap;
+
+	va_start(ap, format);
+	count = c99_vsnprintf(outBuf, size, format, ap);
+	va_end(ap);
+
+	return count;
+}
+
+inline 
+
+#endif
+
+extern int win_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen);
 int win_setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen);
 
 // only support fcntl(fd, F_SETFL, O_NONBLOCK)
