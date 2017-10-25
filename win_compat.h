@@ -4,10 +4,10 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdint.h>
-extern "C" {
+
 #include <lua.h>
 #include <lauxlib.h>
-};
+
 #define SO_NOSIGPIPE 0		// ignore it, don't support
 
 #ifndef WIN_COMPAT_IMPL
@@ -27,7 +27,7 @@ extern "C" {
 
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1900
+#if defined(_MSC_VER)
 
 #define snprintf c99_snprintf
 #define vsnprintf c99_vsnprintf
@@ -68,7 +68,7 @@ int win_setsockopt(int sockfd, int level, int optname, const void *optval, sockl
 #define F_SETFL 0
 #define O_NONBLOCK 0
 int fcntl(int fd, int cmd, int value);
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+// const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
 typedef u_short sa_family_t;
 

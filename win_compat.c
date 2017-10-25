@@ -122,7 +122,7 @@ inet_ntop6(const unsigned char *src, char *dst, size_t size) {
 	memcpy(dst, tmp, tp - tmp);
 	return dst;
 }
-
+/*
 const char *
 inet_ntop(int af, const void *src, char *dst,  socklen_t size) {
 	switch (af) {
@@ -134,6 +134,7 @@ inet_ntop(int af, const void *src, char *dst,  socklen_t size) {
 		return NULL;
 	}
 }
+*/
 
 void
 init_socketlib(lua_State *L) {
