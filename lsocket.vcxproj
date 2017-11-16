@@ -75,6 +75,19 @@
   <ItemGroup>
     <ClInclude Include="win_compat.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="samples\httpclient.lua" />
+    <None Include="samples\httpserver.lua" />
+    <None Include="samples\rshttpd.lua" />
+    <None Include="samples\testclt_mcast.lua" />
+    <None Include="samples\testclt_tcp.lua" />
+    <None Include="samples\testclt_udp.lua" />
+    <None Include="samples\testclt_unix.lua" />
+    <None Include="samples\testsrv_mcast.lua" />
+    <None Include="samples\testsrv_tcp.lua" />
+    <None Include="samples\testsrv_udp.lua" />
+    <None Include="samples\testsrv_unix.lua" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
