@@ -5,6 +5,7 @@
  * Gunnar Zötl <gz@tset.de>, 2013-2015
  * Released under the terms of the MIT license. See file LICENSE for details.
  */
+#define LUA_LIB
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,6 +27,7 @@
 #include <netdb.h>
 #include <dirent.h>
 #include <ifaddrs.h>
+#include <sys/time.h>
 #endif // _WIN32
 
 #ifndef IPV6_ADD_MEMBERSHIP
@@ -272,9 +274,9 @@ static const char *_addr2string(struct sockaddr *sa, socklen_t slen, char *buf, 
 {
 	const char *s = 0;
 	if (sa->sa_family == AF_INET)
-		s = inet_ntop(sa->sa_family, (const void*) &((struct sockaddr_in*)sa)->sin_addr, buf, buflen);
+		s = inet_ntop(sa->sa_family, (void*) &((struct sockaddr_in*)sa)->sin_addr, buf, buflen);
 	else if (sa->sa_family == AF_INET6)
-		s = inet_ntop(sa->sa_family, (const void*) &((struct sockaddr_in6*)sa)->sin6_addr, buf, buflen);
+		s = inet_ntop(sa->sa_family, (void*) &((struct sockaddr_in6*)sa)->sin6_addr, buf, buflen);
 	else if (sa->sa_family == AF_UNIX) {
 		if (slen > offsetof(struct sockaddr_un, sun_path))
 			strncpy(buf, ((struct sockaddr_un*)sa)->sun_path, buflen);
@@ -1173,11 +1175,8 @@ static int _table2fd_set(lua_State *L, int idx, fd_set *s)
 	lua_rawgeti(L, idx, i++);
 	while (lsocket_islSocket(L, -1)) {
 		lSocket *sock = lsocket_checklSocket(L, -1);
-		if (sock->sockfd > FD_SETSIZE) {
-			lua_pop(L, 1);
-			return luaL_error(L, "bad argument to 'select' (socket file descriptor too big)");
-		}
 		if (sock->sockfd >= 0) {
+			// todo: check FD_SETSIZE
 			FD_SET(sock->sockfd, s);
 			if (sock->sockfd > maxfd) maxfd = sock->sockfd;
 		}
@@ -1484,7 +1483,7 @@ static int lsocket_ignore(lua_State *L)
  */
 LUAMOD_API int luaopen_lsocket(lua_State *L) {
 	luaL_newlib(L, lsocket);
-
+    
 	/* add constants */
 	lua_pushliteral(L, "INADDR_ANY");
 	lua_pushliteral(L, "0.0.0.0");
@@ -1528,6 +1527,10 @@ LUAMOD_API int luaopen_lsocket(lua_State *L) {
 	lua_pushvalue(L, -2);
 	lua_settable(L, LUA_REGISTRYINDEX);
 	lua_pop(L, 1);
+
+#ifdef _WIN32
+	init_socketlib(L);
+#endif // _WIN32
 
 	return 1;
 }
