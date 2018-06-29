@@ -7,44 +7,4 @@
   <ItemGroup>
     <ClInclude Include="win_compat.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Filter Include="sample">
-      <UniqueIdentifier>{6e3062e4-3f8e-4a07-889a-57e8e7ba80b6}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="samples\httpclient.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\httpserver.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\rshttpd.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testclt_mcast.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testclt_tcp.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testclt_udp.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testclt_unix.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testsrv_mcast.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testsrv_tcp.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testsrv_udp.lua">
-      <Filter>sample</Filter>
-    </None>
-    <None Include="samples\testsrv_unix.lua">
-      <Filter>sample</Filter>
-    </None>
-  </ItemGroup>
 </Project>
